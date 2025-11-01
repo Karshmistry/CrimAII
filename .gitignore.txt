@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+venv/
+env/
+node_modules/
+dist/
+build/
+.DS_Store
+.env
+*.env
+models/
+datasets/
+*.pkl
+*.h5
+*.pt

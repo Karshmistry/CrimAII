@@ -1,0 +1,1309 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS C:\Users\karsh> mongosh
+Current Mongosh Log ID: 68dec09d4caa272d22cebea3
+Connecting to:          mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.5.8
+Using MongoDB:          8.2.0
+Using Mongosh:          2.5.8
+
+For mongosh info see: https://www.mongodb.com/docs/mongodb-shell/
+
+------
+   The server generated these startup warnings when booting
+   2025-09-29T10:23:07.866+05:30: Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
+------
+
+test>
+
+test> use crimai
+switched to db crimai
+crimai> db.users.insertOne({
+...   name: "Karsh",
+...   email: "karsh@example.com",
+...   password: "12345"
+... })
+... db.users.find()
+[
+  {
+    _id: ObjectId('68dec0ee4caa272d22cebea4'),
+    name: 'Karsh',
+    email: 'karsh@example.com',
+    password: '12345'
+  }
+]
+crimai> db.criminals.insertOne({
+...   name: "Ramesh",
+...   crime: "Robbery",
+...   location: "Vadodara",
+...   date: new Date()
+... })
+... db.criminals.find().pretty()
+[
+  {
+    _id: ObjectId('68dec1034caa272d22cebea5'),
+    name: 'Ramesh',
+    crime: 'Robbery',
+    location: 'Vadodara',
+    date: ISODate('2025-10-02T18:14:27.523Z')
+  }
+]
+crimai>
+
+
+
+
+from fastapi import FastAPI
+from routes import auth, criminal, logs
+
+app = FastAPI()
+
+# Routes include
+app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
+app.include_router(criminal.router, prefix="/api/criminals", tags=["Criminals"])
+app.include_router(logs.router, prefix="/api/logs", tags=["Logs"])
+
+@app.get("/")
+def root():
+    return {"msg": "CrimAI Backend Running 🚀"}
+
+
+
+
+
+
+detection pq(purple)
+
+
+// src/pages/Detect.js
+import React, { useRef, useState } from "react";
+import Webcam from "react-webcam";
+import axios from "axios";
+
+const Detect = () => {
+  const webcamRef = useRef(null);
+  const [image, setImage] = useState(null);
+  const [videoSrc, setVideoSrc] = useState(null);
+  const [result, setResult] = useState("");
+  const [showWebcam, setShowWebcam] = useState(false);
+
+  const capture = () => {
+    const screenshot = webcamRef.current.getScreenshot();
+    setImage(screenshot);
+  };
+
+  const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    try {
+      const res = await axios.post("http://127.0.0.1:5000/recognize", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setResult(res.data.message || JSON.stringify(res.data));
+    } catch (err) {
+      console.error(err);
+      setResult("Error detecting face");
+    }
+  };
+
+  const handleVideoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setVideoSrc(url);
+      alert("Video detection not implemented yet");
+    }
+  };
+
+  const startDetection = () => {
+    if (image) {
+      uploadImage(dataURLtoFile(image, "webcam.jpg"));
+    } else if (videoSrc) {
+      alert("Video detection not implemented yet");
+    } else {
+      alert("Please upload an image/video or use webcam first");
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-900 via-indigo-900 to-black text-white p-6">
+      <h2 className="text-3xl md:text-4xl font-extrabold mb-8 text-center tracking-wider">
+        🔍 Detect Criminal
+      </h2>
+
+      <div className="bg-gray-800/80 backdrop-blur-md p-6 rounded-2xl w-full max-w-lg text-center shadow-xl border border-white/20">
+        {/* Preview Section */}
+        <div className="mb-4">
+          {!videoSrc && !image && !showWebcam ? (
+            <div className="border-2 border-dashed border-white/50 p-20 rounded-xl flex items-center justify-center text-gray-300 text-lg font-medium">
+              Camera / Video Feed
+            </div>
+          ) : showWebcam && !image ? (
+            <Webcam
+              audio={false}
+              ref={webcamRef}
+              screenshotFormat="image/jpeg"
+              className="w-full rounded-xl shadow-lg border border-white/20"
+            />
+          ) : image ? (
+            <img
+              src={image}
+              alt="Captured"
+              className="w-full rounded-xl shadow-lg border border-white/20"
+            />
+          ) : (
+            <video
+              src={videoSrc}
+              controls
+              className="w-full rounded-xl shadow-lg border border-white/20"
+            />
+          )}
+        </div>
+
+        <p className="mb-6 text-gray-300">
+          Live video feed / webcam image upload ke liye model connect karne ke baad detection yaha dikhega
+        </p>
+
+        {/* Buttons */}
+        <div className="flex flex-col md:flex-row justify-center gap-4">
+          <button
+            onClick={startDetection}
+            className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 px-5 py-3 rounded-xl font-semibold shadow-lg hover:scale-105 hover:shadow-2xl transition transform"
+          >
+            Start Detection
+          </button>
+
+          <label className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 px-5 py-3 rounded-xl font-semibold shadow-lg hover:scale-105 hover:shadow-2xl transition transform cursor-pointer">
+            Upload Image
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => uploadImage(e.target.files[0])}
+              className="hidden"
+            />
+          </label>
+
+          <label className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 px-5 py-3 rounded-xl font-semibold shadow-lg hover:scale-105 hover:shadow-2xl transition transform cursor-pointer">
+            Upload Video
+            <input
+              type="file"
+              accept="video/*"
+              onChange={handleVideoUpload}
+              className="hidden"
+            />
+          </label>
+
+          <button
+            onClick={() => setShowWebcam(!showWebcam)}
+            className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 px-5 py-3 rounded-xl font-semibold shadow-lg hover:scale-105 hover:shadow-2xl transition transform"
+          >
+            {showWebcam ? "Close Webcam" : "Use Webcam"}
+          </button>
+
+          {showWebcam && image && (
+            <button
+              onClick={() => setImage(null)}
+              className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 px-5 py-3 rounded-xl font-semibold shadow-lg hover:scale-105 hover:shadow-2xl transition transform"
+            >
+              Retake
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Detection Result */}
+      {result && (
+        <p className="mt-6 text-center text-lg font-semibold bg-white/10 px-6 py-3 rounded-xl shadow-md backdrop-blur-md border border-white/20">
+          {result}
+        </p>
+      )}
+    </div>
+  );
+};
+
+// Helper function
+function dataURLtoFile(dataurl, filename) {
+  let arr = dataurl.split(","),
+    mime = arr[0].match(/:(.*?);/)[1],
+    bstr = atob(arr[1]),
+    n = bstr.length,
+    u8arr = new Uint8Array(n);
+  while (n--) u8arr[n] = bstr.charCodeAt(n);
+  return new File([u8arr], filename, { type: mime });
+}
+
+export default Detect;
+
+
+
+
+import React, { useState } from "react";
+
+
+const Profile = () => {
+  const [activeTab, setActiveTab] = useState("about");
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "about":
+        return <p>This is CrimAI app. Detect and manage crime data efficiently.</p>;
+      case "settings":
+        return <p>Change your preferences, theme, and account settings here.</p>;
+      case "contact":
+        return <p>Contact us at support@crimai.com or +91 12345 67890.</p>;
+      case "feedback":
+        return <p>Send your feedback to help us improve the app.</p>;
+      case "help":
+        return <p>Need help? Follow the instructions or contact support.</p>;
+      case "faq":
+        return (
+          <div>
+            <p>Q1: How to add a detection?</p>
+            <p>A1: Go to Add page and upload details.</p>
+            <p>Q2: How to view logs?</p>
+            <p>A2: Check Logs page for history.</p>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-6">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">User Profile</h1>
+
+      {/* Tabs */}
+      <div className="flex space-x-4 mb-4">
+        {["about", "settings", "contact", "feedback", "help", "faq"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 rounded ${
+              activeTab === tab ? "bg-blue-600 text-white" : "bg-gray-300 text-gray-700"
+            }`}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div className="bg-white p-6 rounded shadow">{renderContent()}</div>
+    </div>
+  );
+};
+
+export default Profile;
+
+
+
+app.py
+
+
+# app.py
+from flask import Flask, request, jsonify
+from deepface import DeepFace
+import os
+import tempfile
+from werkzeug.utils import secure_filename
+from pymongo import MongoClient
+from datetime import datetime
+from flask_cors import CORS
+
+# Optional environment variables
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    pass
+
+app = Flask(__name__)
+CORS(app)
+
+# --- CONFIG ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FACES_DIR = os.path.join(BASE_DIR, "face_recognition", "faces_db")
+os.makedirs(FACES_DIR, exist_ok=True)
+
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://127.0.0.1:27017/crimai")
+MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "crimai")
+
+# MongoDB Connection
+try:
+    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+    try:
+        db = client.get_default_database() or client[MONGO_DB_NAME]
+    except Exception:
+        db = client[MONGO_DB_NAME]
+    criminals_col = db.get_collection("criminals")
+    print("✅ MongoDB connected")
+except Exception as e:
+    print("⚠️ MongoDB not connected:", e)
+    client = db = criminals_col = None
+
+# --- ROUTES ---
+
+@app.route("/")
+def home():
+    return jsonify({"message": "Face Recognition API running ✅"})
+
+# -------------------- ADD CRIMINAL --------------------
+@app.route("/add_criminal", methods=["POST"])
+def add_criminal():
+    """
+    Accepts multipart/form-data:
+    - name (required)
+    - age (optional)
+    - details (optional)
+    - image (required)
+    """
+    try:
+        name = request.form.get("name")
+        age = request.form.get("age")
+        details = request.form.get("details")
+        image = request.files.get("image")
+
+        if not name or not image:
+            return jsonify({"error": "Name and image are required"}), 400
+
+        # Secure filename
+        safe_name = secure_filename(name.replace(" ", "_"))
+        ext = os.path.splitext(image.filename)[1] or ".jpg"
+        timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        filename = f"{safe_name}_{timestamp}{ext}"
+        save_path = os.path.join(FACES_DIR, filename)
+        image.save(save_path)
+
+        # Save to MongoDB
+        doc = {
+            "name": name,
+            "age": int(age) if age and age.isdigit() else None,
+            "details": details,
+            "image_filename": filename,
+            "image_path": f"/faces_db/{filename}",
+            "created_at": datetime.utcnow()
+        }
+
+        if criminals_col:
+            try:
+                criminals_col.insert_one(doc)
+            except Exception as db_err:
+                return jsonify({
+                    "message": "File saved, but DB insert failed",
+                    "file_saved": filename,
+                    "warning": str(db_err)
+                }), 201
+
+        return jsonify({
+            "message": f"✅ Criminal {name} added successfully!",
+            "file_saved": filename
+        }), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# -------------------- RECOGNIZE FACE --------------------
+@app.route("/recognize", methods=["POST"])
+def recognize():
+    try:
+        if "image" not in request.files:
+            return jsonify({"error": "No image provided"}), 400
+
+        image = request.files["image"]
+        temp_dir = tempfile.mkdtemp()
+        temp_path = os.path.join(temp_dir, secure_filename(image.filename or "tmp.jpg"))
+        image.save(temp_path)
+
+        # Analyze face
+        try:
+            analyze_res = DeepFace.analyze(
+                img_path=temp_path,
+                actions=['age', 'gender', 'emotion'],
+                enforce_detection=False
+            )
+        except Exception as e:
+            analyze_res = {"error": f"analyze_failed: {str(e)}"}
+
+        # Verify against stored faces
+        match_found = False
+        matched_file = None
+        try:
+            for fname in os.listdir(FACES_DIR):
+                if not fname.lower().endswith((".jpg", ".jpeg", ".png")):
+                    continue
+                db_path = os.path.join(FACES_DIR, fname)
+                v = DeepFace.verify(
+                    img1_path=temp_path,
+                    img2_path=db_path,
+                    model_name="VGG-Face",
+                    enforce_detection=False
+                )
+                if v.get("verified"):
+                    match_found = True
+                    matched_file = fname
+                    break
+        except Exception as e:
+            print("Verification error:", e)
+
+        # Cleanup temp file
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
+        resp = {
+            "analyze": analyze_res,
+            "match": match_found,
+            "matched_filename": matched_file,
+            "message": f"⚠️ Criminal Found: {matched_file}" if match_found else "✅ No criminal match found"
+        }
+        return jsonify(resp), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# -------------------- FRONTEND PROXY --------------------
+@app.route("/api/recognize", methods=["POST"])
+def api_recognize_proxy():
+    return recognize()
+
+# -------------------- RUN APP --------------------
+if __name__ == "__main__":
+    app.run(port=5000, debug=True)
+
+
+App.js
+
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+// Components
+import Navbar from "./components/Navbar";
+
+// Pages
+import Home from "./pages/Home";
+import Explore from "./pages/Explore";
+import Logs from "./pages/Logs";
+import Add from "./pages/Add";
+import Detect from "./pages/Detect";
+import Welcome from "./pages/welcome";
+import Login from "./pages/Login";   // ✅ Import kiya
+import Signup from "./pages/Signup"; // ✅ Import kiya
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        {/* Welcome Screen (No Navbar) */}
+        <Route path="/" element={<Welcome />} />
+
+        {/* Auth Pages (No Navbar) */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+
+        {/* Pages with Navbar */}
+        <Route
+          path="/home"
+          element={
+            <div className="min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-black">
+              <Navbar />
+              <Home />
+            </div>
+          }
+        />
+        <Route
+          path="/explore"
+          element={
+            <div className="min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-black">
+              <Navbar />
+              <Explore />
+            </div>
+          }
+        />
+        <Route
+          path="/logs"
+          element={
+            <div className="min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-black">
+              <Navbar />
+              <Logs />
+            </div>
+          }
+        />
+        <Route
+          path="/add"
+          element={
+            <div className="min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-black">
+              <Navbar />
+              <Add />
+            </div>
+          }
+        />
+        <Route
+          path="/detect"
+          element={
+            <div className="min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-black">
+              <Navbar />
+              <Detect />
+            </div>
+          }
+        />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+
+
+
+
+
+
+
+add.js 
+
+import React, { useState } from "react";
+import axios from "axios";
+
+const Add = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    father_name: "",
+    age: "",
+    gender: "",
+    blood_group: "",
+    crime_type: "",
+    wanted_level: "",
+    address: "",
+    city: "",
+    state: "",
+    last_seen: "",
+    details: "",
+    image: null,
+  });
+
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    if (files) {
+      setFormData({ ...formData, image: files[0] });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    setLoading(true);
+
+    const data = new FormData();
+    Object.keys(formData).forEach((key) => data.append(key, formData[key]));
+
+    try {
+      const res = await axios.post("http://127.0.0.1:5000/add_criminal", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setMessage(res.data.message || "✅ Criminal added successfully!");
+      setFormData({
+        name: "",
+        father_name: "",
+        age: "",
+        gender: "",
+        blood_group: "",
+        crime_type: "",
+        wanted_level: "",
+        address: "",
+        city: "",
+        state: "",
+        last_seen: "",
+        details: "",
+        image: null,
+      });
+    } catch (err) {
+      console.error(err);
+      setMessage("❌ Error adding criminal. Check backend connection.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-black flex flex-col items-center pt-20 p-10 text-white">
+      <h2 className="text-4xl font-extrabold mb-8 text-center tracking-wide">
+        ➕ Add New Criminal Record
+      </h2>
+
+      <form
+        className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl bg-white/10 p-8 rounded-2xl shadow-lg"
+        onSubmit={handleSubmit}
+      >
+        {/* Basic Info */}
+        <input
+          type="text"
+          name="name"
+          placeholder="Full Name"
+          value={formData.name}
+          onChange={handleChange}
+          className="p-3 rounded bg-white/20 text-white placeholder-white"
+          required
+        />
+        <input
+          type="text"
+          name="father_name"
+          placeholder="Father's Name"
+          value={formData.father_name}
+          onChange={handleChange}
+          className="p-3 rounded bg-white/20 text-white placeholder-white"
+        />
+
+        <input
+          type="number"
+          name="age"
+          placeholder="Age"
+          value={formData.age}
+          onChange={handleChange}
+          className="p-3 rounded bg-white/20 text-white placeholder-white"
+        />
+
+        {/* Fixed dropdowns (black background, white text) */}
+        <select
+          name="gender"
+          value={formData.gender}
+          onChange={handleChange}
+          className="p-3 rounded bg-white/20 text-white border border-white"
+        >
+          <option value="">Gender</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+
+        <select
+          name="blood_group"
+          value={formData.blood_group}
+          onChange={handleChange}
+          className="p-3 rounded bg-white/20 text-white border border-white"
+        >
+          <option value="">Blood Group</option>
+          {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map((bg) => (
+            <option key={bg}>{bg}</option>
+          ))}
+        </select>
+
+        <select
+          name="crime_type"
+          value={formData.crime_type}
+          onChange={handleChange}
+          className="p-3 rounded bg-white/20 text-white border border-white"
+        >
+          <option value="">Crime Type</option>
+          {[
+            "Murder",
+            "Robbery",
+            "Cyber Crime",
+            "Fraud",
+            "Kidnapping",
+            "Smuggling",
+            "Assault",
+            "Drug Dealing",
+          ].map((crime) => (
+            <option key={crime}>{crime}</option>
+          ))}
+        </select>
+
+        <select
+          name="wanted_level"
+          value={formData.wanted_level}
+          onChange={handleChange}
+          className="p-3 rounded bg-white/20 text-white border border-white"
+        >
+          <option value="">Wanted Level</option>
+          <option>Low</option>
+          <option>Medium</option>
+          <option>High</option>
+        </select>
+
+        <input
+          type="text"
+          name="address"
+          placeholder="Address"
+          value={formData.address}
+          onChange={handleChange}
+          className="p-3 rounded bg-white/20 text-white placeholder-white col-span-2"
+        />
+        <input
+          type="text"
+          name="city"
+          placeholder="City"
+          value={formData.city}
+          onChange={handleChange}
+          className="p-3 rounded bg-white/20 text-white placeholder-white"
+        />
+        <input
+          type="text"
+          name="state"
+          placeholder="State"
+          value={formData.state}
+          onChange={handleChange}
+          className="p-3 rounded bg-white/20 text-white placeholder-white"
+        />
+
+        <input
+          type="text"
+          name="last_seen"
+          placeholder="Last Seen (Date/Location)"
+          value={formData.last_seen}
+          onChange={handleChange}
+          className="p-3 rounded bg-white/20 text-white placeholder-white col-span-2"
+        />
+
+        <textarea
+          name="details"
+          placeholder="Additional Details / Notes"
+          value={formData.details}
+          onChange={handleChange}
+          className="p-3 rounded bg-white/20 text-white placeholder-white col-span-2"
+        ></textarea>
+
+        <input
+          type="file"
+          name="image"
+          accept="image/*"
+          onChange={handleChange}
+          className="p-3 rounded bg-white/20 text-white col-span-2"
+          required
+        />
+
+        <button
+          type="submit"
+          disabled={loading}
+          className={`col-span-2 px-6 py-3 rounded-lg font-semibold transition ${
+            loading ? "bg-gray-600" : "bg-blue-600 hover:bg-blue-700"
+          }`}
+        >
+          {loading ? "Adding..." : "Add Criminal Record"}
+        </button>
+      </form>
+
+      {message && (
+        <p
+          className={`mt-6 text-lg font-semibold ${
+            message.startsWith("✅") ? "text-green-400" : "text-red-400"
+          }`}
+        >
+          {message}
+        </p>
+      )}
+    </div>
+  );
+};
+
+export default Add;
+
+app.py
+
+from flask import Flask, request, jsonify, send_from_directory
+from deepface import DeepFace
+import os
+import tempfile
+from werkzeug.utils import secure_filename
+from pymongo import MongoClient
+from datetime import datetime
+from flask_cors import CORS
+import cv2
+
+# --- LOAD ENV VARIABLES ---
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    pass
+
+# --- APP INIT ---
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+# --- CONFIG ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FACES_DIR = os.path.join(BASE_DIR, "face_recognition", "faces_db")
+os.makedirs(FACES_DIR, exist_ok=True)
+
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://127.0.0.1:27017")
+MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "crimai")
+
+# --- MONGODB CONNECTION ---
+try:
+    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+    db = client[MONGO_DB_NAME]
+    criminals_col = db["criminals"]
+    detections_col = db["detections"]
+    print("✅ MongoDB connected successfully")
+except Exception as e:
+    print("⚠️ MongoDB not connected:", e)
+    client = db = criminals_col = detections_col = None
+
+
+# -------------------- HOME --------------------
+@app.route("/")
+def home():
+    return jsonify({"message": "CrimAI Backend Running ✅"})
+
+
+# -------------------- ADD CRIMINAL --------------------
+@app.route("/add_criminal", methods=["POST"])
+def add_criminal():
+    try:
+        if criminals_col is None:
+            return jsonify({"error": "MongoDB not connected"}), 500
+
+        data = request.form
+        image = request.files.get("image")
+
+        if not data.get("name") or not image:
+            return jsonify({"error": "Name and image are required"}), 400
+
+        safe_name = secure_filename(data["name"].replace(" ", "_"))
+        ext = os.path.splitext(image.filename)[1] or ".jpg"
+        timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        filename = f"{safe_name}_{timestamp}{ext}"
+        save_path = os.path.join(FACES_DIR, filename)
+        image.save(save_path)
+
+        doc = {
+            "name": data.get("name"),
+            "age": data.get("age"),
+            "father_name": data.get("father_name"),
+            "gender": data.get("gender"),
+            "blood_group": data.get("blood_group"),
+            "address": data.get("address"),
+            "crime": data.get("crime"),
+            "details": data.get("details"),
+            "image_filename": filename,
+            "image_path": f"/faces_db/{filename}",
+            "created_at": datetime.utcnow(),
+        }
+
+        criminals_col.insert_one(doc)
+        return jsonify({"message": f"✅ Criminal {data['name']} added successfully!", "file_saved": filename}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# -------------------- MATCH CRIMINAL --------------------
+def match_criminal(temp_path, source_type="image"):
+    """Helper function to verify against known criminals"""
+    if criminals_col is None or detections_col is None:
+        return None, None
+
+    for fname in os.listdir(FACES_DIR):
+        if not fname.lower().endswith((".jpg", ".jpeg", ".png")):
+            continue
+
+        db_path = os.path.join(FACES_DIR, fname)
+        try:
+            v = DeepFace.verify(img1_path=temp_path, img2_path=db_path, model_name="VGG-Face", enforce_detection=False)
+            if v.get("verified"):
+                matched_criminal = criminals_col.find_one({"image_filename": fname}, {"_id": 0})
+                if matched_criminal:
+                    detections_col.insert_one({
+                        "criminal_name": matched_criminal["name"],
+                        "criminal_details": matched_criminal,
+                        "detected_at": datetime.utcnow(),
+                        "source": source_type,
+                        "status": "Detected",
+                    })
+                return fname, matched_criminal
+        except Exception:
+            continue
+    return None, None
+
+
+# -------------------- RECOGNIZE IMAGE --------------------
+@app.route("/recognize", methods=["POST"])
+def recognize():
+    try:
+        if "image" not in request.files:
+            return jsonify({"error": "No image provided"}), 400
+
+        image = request.files["image"]
+        temp_path = os.path.join(tempfile.mkdtemp(), secure_filename(image.filename))
+        image.save(temp_path)
+
+        matched_file, matched_criminal = match_criminal(temp_path, "image")
+        os.remove(temp_path)
+
+        if matched_file:
+            return jsonify({
+                "match": True,
+                "matched_filename": matched_file,
+                "image_url": f"/faces_db/{matched_file}",
+                "message": f"⚠️ Criminal Found: {matched_criminal.get('name', 'Unknown')}",
+                "criminal_details": matched_criminal
+            }), 200
+        else:
+            return jsonify({"match": False, "message": "✅ No match found"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# -------------------- RECOGNIZE VIDEO --------------------
+@app.route("/recognize_video", methods=["POST"])
+def recognize_video():
+    try:
+        if "video" not in request.files:
+            return jsonify({"error": "No video provided"}), 400
+
+        video = request.files["video"]
+        temp_dir = tempfile.mkdtemp()
+        video_path = os.path.join(temp_dir, secure_filename(video.filename))
+        video.save(video_path)
+
+        cap = cv2.VideoCapture(video_path)
+        frame_count = 0
+
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+            frame_count += 1
+            if frame_count % 10 != 0:
+                continue
+
+            frame_img_path = os.path.join(temp_dir, f"frame_{frame_count}.jpg")
+            cv2.imwrite(frame_img_path, frame)
+
+            matched_file, matched_criminal = match_criminal(frame_img_path, "video")
+            if matched_file:
+                cap.release()
+                cv2.destroyAllWindows()
+                return jsonify({
+                    "match": True,
+                    "matched_filename": matched_file,
+                    "image_url": f"/faces_db/{matched_file}",
+                    "message": f"⚠️ Criminal Found in video frame {frame_count}: {matched_criminal.get('name', 'Unknown')}",
+                    "criminal_details": matched_criminal
+                }), 200
+
+        cap.release()
+        cv2.destroyAllWindows()
+        return jsonify({"match": False, "message": "✅ No criminal match found"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# -------------------- RECOGNIZE WEBCAM --------------------
+@app.route("/recognize_webcam", methods=["POST"])
+def recognize_webcam():
+    try:
+        if "image" not in request.files:
+            return jsonify({"error": "No image uploaded"}), 400
+
+        image = request.files["image"]
+        temp_path = os.path.join(tempfile.mkdtemp(), secure_filename(image.filename))
+        image.save(temp_path)
+
+        matched_file, matched_criminal = match_criminal(temp_path, "webcam")
+        os.remove(temp_path)
+
+        if matched_file:
+            return jsonify({
+                "match": True,
+                "matched_filename": matched_file,
+                "image_url": f"/faces_db/{matched_file}",
+                "message": f"⚠️ Criminal Found via Webcam: {matched_criminal.get('name', 'Unknown')}",
+                "criminal_details": matched_criminal
+            }), 200
+        else:
+            return jsonify({"match": False, "message": "✅ No match found"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# -------------------- GET DETECTIONS --------------------
+@app.route("/detections", methods=["GET"])
+def get_detections():
+    if detections_col is None:
+        return jsonify({"error": "MongoDB not connected"}), 500
+    detections = list(detections_col.find({}, {"_id": 0}).sort("detected_at", -1))
+    return jsonify(detections)
+
+
+app.py
+
+from flask import Flask, request, jsonify, send_from_directory
+from deepface import DeepFace
+import os
+import tempfile
+from werkzeug.utils import secure_filename
+from pymongo import MongoClient
+from datetime import datetime
+from flask_cors import CORS
+import cv2
+
+# --- LOAD ENV VARIABLES ---
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    pass
+
+# --- APP INIT ---
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+# --- CONFIG ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FACES_DIR = os.path.join(BASE_DIR, "face_recognition", "faces_db")
+os.makedirs(FACES_DIR, exist_ok=True)
+
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://127.0.0.1:27017")
+MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "crimai")
+
+# --- MONGODB CONNECTION ---
+try:
+    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+    db = client[MONGO_DB_NAME]
+    criminals_col = db["criminals"]
+    detections_col = db["detections"]
+    print("✅ MongoDB connected successfully")
+except Exception as e:
+    print("⚠️ MongoDB not connected:", e)
+    client = db = criminals_col = detections_col = None
+
+
+# -------------------- HOME --------------------
+@app.route("/")
+def home():
+    return jsonify({"message": "CrimAI Backend Running ✅"})
+
+
+# -------------------- ADD CRIMINAL --------------------
+@app.route("/add_criminal", methods=["POST"])
+def add_criminal():
+    try:
+        if criminals_col is None:
+            return jsonify({"error": "MongoDB not connected"}), 500
+
+        data = request.form
+        image = request.files.get("image")
+
+        if not data.get("name") or not image:
+            return jsonify({"error": "Name and image are required"}), 400
+
+        safe_name = secure_filename(data["name"].replace(" ", "_"))
+        ext = os.path.splitext(image.filename)[1] or ".jpg"
+        timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        filename = f"{safe_name}_{timestamp}{ext}"
+        save_path = os.path.join(FACES_DIR, filename)
+        image.save(save_path)
+
+        doc = {
+            "name": data.get("name"),
+            "age": data.get("age"),
+            "father_name": data.get("father_name"),
+            "gender": data.get("gender"),
+            "blood_group": data.get("blood_group"),
+            "address": data.get("address"),
+            "crime": data.get("crime"),
+            "details": data.get("details"),
+            "image_filename": filename,
+            "image_path": f"/faces_db/{filename}",
+            "created_at": datetime.utcnow(),
+        }
+
+        criminals_col.insert_one(doc)
+        return jsonify({"message": f"✅ Criminal {data['name']} added successfully!", "file_saved": filename}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# -------------------- MATCH CRIMINAL --------------------
+def match_criminal(temp_path, source_type="image"):
+    """Helper function to verify against known criminals"""
+    if criminals_col is None or detections_col is None:
+        return None, None
+
+    for fname in os.listdir(FACES_DIR):
+        if not fname.lower().endswith((".jpg", ".jpeg", ".png")):
+            continue
+
+        db_path = os.path.join(FACES_DIR, fname)
+        try:
+            v = DeepFace.verify(img1_path=temp_path, img2_path=db_path, model_name="VGG-Face", enforce_detection=False)
+            if v.get("verified"):
+                matched_criminal = criminals_col.find_one({"image_filename": fname}, {"_id": 0})
+                if matched_criminal:
+                    detections_col.insert_one({
+                        "criminal_name": matched_criminal["name"],
+                        "criminal_details": matched_criminal,
+                        "detected_at": datetime.utcnow(),
+                        "source": source_type,
+                        "status": "Detected",
+                    })
+                return fname, matched_criminal
+        except Exception:
+            continue
+    return None, None
+
+
+# -------------------- RECOGNIZE IMAGE --------------------
+@app.route("/recognize", methods=["POST"])
+def recognize():
+    try:
+        if "image" not in request.files:
+            return jsonify({"error": "No image provided"}), 400
+
+        image = request.files["image"]
+        temp_path = os.path.join(tempfile.mkdtemp(), secure_filename(image.filename))
+        image.save(temp_path)
+
+        matched_file, matched_criminal = match_criminal(temp_path, "image")
+        os.remove(temp_path)
+
+        if matched_file:
+            return jsonify({
+                "match": True,
+                "matched_filename": matched_file,
+                "image_url": f"/faces_db/{matched_file}",
+                "message": f"⚠️ Criminal Found: {matched_criminal.get('name', 'Unknown')}",
+                "criminal_details": matched_criminal
+            }), 200
+        else:
+            return jsonify({"match": False, "message": "✅ No match found"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# -------------------- RECOGNIZE VIDEO --------------------
+@app.route("/recognize_video", methods=["POST"])
+def recognize_video():
+    try:
+        if "video" not in request.files:
+            return jsonify({"error": "No video provided"}), 400
+
+        video = request.files["video"]
+        temp_dir = tempfile.mkdtemp()
+        video_path = os.path.join(temp_dir, secure_filename(video.filename))
+        video.save(video_path)
+
+        cap = cv2.VideoCapture(video_path)
+        frame_count = 0
+
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+            frame_count += 1
+            if frame_count % 10 != 0:
+                continue
+
+            frame_img_path = os.path.join(temp_dir, f"frame_{frame_count}.jpg")
+            cv2.imwrite(frame_img_path, frame)
+
+            matched_file, matched_criminal = match_criminal(frame_img_path, "video")
+            if matched_file:
+                cap.release()
+                cv2.destroyAllWindows()
+                return jsonify({
+                    "match": True,
+                    "matched_filename": matched_file,
+                    "image_url": f"/faces_db/{matched_file}",
+                    "message": f"⚠️ Criminal Found in video frame {frame_count}: {matched_criminal.get('name', 'Unknown')}",
+                    "criminal_details": matched_criminal
+                }), 200
+
+        cap.release()
+        cv2.destroyAllWindows()
+        return jsonify({"match": False, "message": "✅ No criminal match found"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# -------------------- RECOGNIZE WEBCAM --------------------
+@app.route("/recognize_webcam", methods=["POST"])
+def recognize_webcam():
+    try:
+        if "image" not in request.files:
+            return jsonify({"error": "No image uploaded"}), 400
+
+        image = request.files["image"]
+        temp_path = os.path.join(tempfile.mkdtemp(), secure_filename(image.filename))
+        image.save(temp_path)
+
+        matched_file, matched_criminal = match_criminal(temp_path, "webcam")
+        os.remove(temp_path)
+
+        if matched_file:
+            return jsonify({
+                "match": True,
+                "matched_filename": matched_file,
+                "image_url": f"/faces_db/{matched_file}",
+                "message": f"⚠️ Criminal Found via Webcam: {matched_criminal.get('name', 'Unknown')}",
+                "criminal_details": matched_criminal
+            }), 200
+        else:
+            return jsonify({"match": False, "message": "✅ No match found"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# -------------------- GET DETECTIONS --------------------
+@app.route("/detections", methods=["GET"])
+def get_detections():
+    if detections_col is None:
+        return jsonify({"error": "MongoDB not connected"}), 500
+    detections = list(detections_col.find({}, {"_id": 0}).sort("detected_at", -1))
+    return jsonify(detections)
+
+
+# -------------------- SERVE FACES --------------------
+@app.route("/faces_db/<filename>")
+def serve_face(filename):
+    return send_from_directory(FACES_DIR, filename)
+
+
+if __name__ == "__main__":
+    app.run(port=5000, debug=True)
+
+# -------------------- GET USER PROFILE --------------------
+@app.route("/api/user", methods=["GET"])
+def get_user():
+    try:
+        # Agar MongoDB me users collection hai to fetch kar sakte ho
+        # user = db.users.find_one({}, {"_id": 0})  
+
+        # Temporary dummy data for testing
+        user = {
+            "name": "Karsh Mistry",
+            "email": "karsh@example.com",
+            "phone": "+91 9876543210",
+            "joinDate": "2024-08-15T10:00:00"
+        }
+
+        return jsonify(user), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+# -------------------- SERVE FACES --------------------
+@app.route("/faces_db/<filename>")
+def serve_face(filename):
+    return send_from_directory(FACES_DIR, filename)
+
+
+if __name__ == "__main__":
+    app.run(port=5000, debug=True)
+
+
+
